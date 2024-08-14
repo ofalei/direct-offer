@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0 <0.9.0;
 
-import "./HederaResponseCodes.sol";
-import "./IHederaTokenService.sol";
-import "./HederaTokenService.sol";
+import "./system-contracts/HederaResponseCodes.sol";
+import "./system-contracts/IHederaTokenService.sol";
+import "./system-contracts/HederaTokenService.sol";
 
 contract OneTimeJobEscrow is HederaTokenService {
     // Define an enum for the escrow status
