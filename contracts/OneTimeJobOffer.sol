@@ -6,7 +6,7 @@ import "./system-contracts/IHederaTokenService.sol";
 import "./system-contracts/HederaTokenService.sol";
 
 contract OneTimeJobOffer is HederaTokenService {
-    // Define an enum for the escrow status
+    // Define an enum for the payment status
     enum PaymentStatus { NotDeposited, Deposited, Released, Refunded }
     PaymentStatus internal status;
     address internal immutable operator;
@@ -18,7 +18,7 @@ contract OneTimeJobOffer is HederaTokenService {
     event Deposited(address employer, int64 amount);
     event Released(address employee, int64 amount);
     event Refunded(address employer, int64 amount);
-    
+
     modifier inStatus(PaymentStatus _status) {
         require(status == _status, "Function cannot be called at this stage");
         _;
@@ -35,20 +35,23 @@ contract OneTimeJobOffer is HederaTokenService {
         token = _token;
         amount = _amount;
         status = PaymentStatus.NotDeposited;
+        // Associate the token with the contract
+        int response = HederaTokenService.associateToken(address(this), _token);
+        require(response == HederaResponseCodes.SUCCESS, "Token association failed");
     }
 
-    // Function to deposit tokens into escrow by the employer
+    // Function to deposit tokens into the contract by the employer
     function deposit() external inStatus(PaymentStatus.NotDeposited) returns (int) {
         require(msg.sender == employer, "Only employer can call this function");
         int response = HederaTokenService.transferToken(token, employer, address(this), amount);
-        require(response == HederaResponseCodes.SUCCESS, "Token transfer to escrow failed");
+        require(response == HederaResponseCodes.SUCCESS, "Token transfer to contract failed");
 
         status = PaymentStatus.Deposited;
         emit Deposited(employer, amount);
         return response;
     }
 
-    // Function to release tokens from escrow to the employee upon successful completion of the work
+    // Function to release tokens from contract to the employee upon successful completion of the work
     function release() external inStatus(PaymentStatus.Deposited) returns (int) {
         require(msg.sender == operator || msg.sender == employer, "Only operator or employer can call this function");
         int response = HederaTokenService.transferToken(token, address(this), employee, amount);
