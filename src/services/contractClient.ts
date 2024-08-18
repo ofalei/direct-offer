@@ -32,7 +32,7 @@ export class ContractClient {
         return contractId;
     }
     async callContract(contractId: ContractId, functionName: string, gasLimit: number) {
-        console.log('Calling contract function', functionName, contractId.toSolidityAddress());
+        console.log('Calling contract function', functionName, contractId);
         const response = await new ContractExecuteTransaction()
             .setContractId(contractId)
             .setGas(gasLimit)

@@ -17,7 +17,7 @@ const {
 
 const CONTRACT_DIR = path.join(__dirname, '../contracts');
 
-async function configureClient() {
+async function configureClient(privateKey, accountId) {
     try {
         const operatorPrivateKey = PrivateKey.fromStringECDSA(process.env.OPERATOR_PRIVATE_KEY);
         const operatorAccountId = AccountId.fromString(process.env.OPERATOR_ACCOUNT_ID);
@@ -118,7 +118,21 @@ async function transferFunds(client, fromAccountId, toAccountId, amount) {
 }
 
 async function main() {
-    const client = await configureClient();
+    const defaultClient = Client.forTestnet();
+    defaultClient.setOperator(
+      AccountId.fromString(process.env.OPERATOR_ACCOUNT_ID),
+      PrivateKey.fromStringECDSA(process.env.OPERATOR_PRIVATE_KEY)
+    );
+
+    const operatorAccount = await createAccount(defaultClient);
+    console.log("Operator account ID is", operatorAccount.accountId.toString());
+    console.log("Operator private key is", operatorAccount.privateKey.toString());
+    await transferFunds(defaultClient, defaultClient.operatorAccountId, operatorAccount.accountId, 500)
+    defaultClient.close()
+
+    const client = Client.forTestnet();
+    client.setOperator(operatorAccount.accountId, operatorAccount.privateKey);
+
     const bytecodePath = path.join(CONTRACT_DIR, 'build/OneTimeJobOffer_sol_OneTimeJobOffer.bin');
     const bytecode = fs.readFileSync(bytecodePath);
     const bytecodeFileId = await uploadFile(client, bytecode.toString());
@@ -126,13 +140,6 @@ async function main() {
 
     const tokenId = await createToken(client);
     console.log("The token ID is", tokenId.toString());
-
-    const operatorAccount = await createAccount(client);
-    await associateToken(client, tokenId, operatorAccount.accountId);
-    console.log("Operator account ID is", operatorAccount.accountId.toString());
-    console.log("Operator private key is", operatorAccount.privateKey.toString());
-
-    await transferFunds(client, client.operatorAccountId, operatorAccount.accountId, 500)
 
     const gollumAccount = await createAccount(client);
     await associateToken(client, tokenId, gollumAccount.accountId);
@@ -143,7 +150,6 @@ async function main() {
     await associateToken(client, tokenId, frodoAccount.accountId);
     console.log("Frodo account ID is", frodoAccount.accountId.toString());
     console.log("Frodo public key is", frodoAccount.publicKey.toString());
-
     client.close()
 }
 
