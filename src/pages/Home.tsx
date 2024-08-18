@@ -4,7 +4,7 @@ import {
   Client,
   PrivateKey,
   PublicKey,
-  TransferTransaction,
+  TransferTransaction, ContractExecuteTransaction, ContractId,
 } from "@hashgraph/sdk";
 import {Button, FormControlLabel,Divider, Radio, RadioGroup, Avatar, Typography} from "@mui/material";
 import { Stack } from "@mui/system";
@@ -15,11 +15,12 @@ import { useState } from "react";
 import { appConfig } from "../config";
 import {HSCSClient} from "../services/hscsClient";
 import {MirrorNodeClient} from "../services/wallets/mirrorNodeClient";
-// TODO
-enum Candidates {
-  FRODO = 'frodo',
-  GOLLUM = 'gollum'
-}
+import {ContractFunctionParameterBuilder} from "../services/wallets/contractFunctionParameterBuilder";
+import ReviewProcess from "../components/ReviewProcess";
+import JobPosting from "../components/JobPosting";
+import CandidateSelection from "../components/CandidateSelection";
+import {Candidates} from "../config/data";
+
 
 function stringToEnum(value: string): Candidates {
   if (Object.values(Candidates).includes(value as Candidates)) {
@@ -50,28 +51,76 @@ async function transferNonFungibleToken(client: Client, tokenId: string, from: s
     console.log("Token transfer status:", receipt.status.toString());
 }
 
+async function callContract(client: Client, contractId: ContractId, functionName: string, gasLimit: number) {
+  console.log('Calling contract function', functionName, contractId.toSolidityAddress());
+    const response = await new ContractExecuteTransaction()
+        .setContractId(contractId)
+        .setGas(gasLimit)
+        .setFunction(functionName)
+        .execute(client);
 
+    const receipt = await response.getReceipt(client);
+    console.log("Contract call status:", receipt.status.toString());
+    return receipt.status
+}
+
+async function deposit(client: Client, contractId: ContractId) {
+  // return await callContract(client, contractId, "deposit", 100_000)
+  const response = await new ContractExecuteTransaction()
+      .setContractId(contractId)
+      .setGas(100_000)
+      .setFunction("deposit")
+      .execute(client);
+
+  const receipt = await response.getReceipt(client);
+  return receipt.status
+}
+
+// async function release(client: Client, contractId: ContractId) {
+//     await callContract(client, contractId, "release", 1_000_000)
+  // const response = await new ContractExecuteTransaction()
+  //     .setContractId(contractId)
+  //     .setGas(1_000_000)
+  //     .setFunction("release")
+  //     .execute(client);
+  //
+  // const receipt = await response.getReceipt(client);
+  // return receipt.status
+// }
+
+async function refund(client: Client, contractId: ContractId) {
+    await callContract(client, contractId, "refund", 1_000_000)
+  // const response = await new ContractExecuteTransaction()
+  //     .setContractId(contractId)
+  //     .setGas(100_000)
+  //     .setFunction("refund")
+  //     .execute(client);
+  //
+  // const receipt = await response.getReceipt(client);
+  // return receipt.status
+}
 
 export default function Home() {
   const operatorClient = getOperatorClient();
   const mirrorNodeClient = new MirrorNodeClient(appConfig.networks.testnet);
   const hscsClient = new HSCSClient(operatorClient)
-
   const { walletInterface, accountId } = useWalletInterface();
   const [selectedCandidate, setSelectedCandidate] = useState(Candidates.FRODO);
+  const [contractId, setContractId] = useState<ContractId | null>(null);
+  const [isDeposited, setIsDeposited] = useState(false);
   const handleCandidateSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedCandidate(stringToEnum(event.target.value)); // Update the state with the selected value
   };
 
   const handleContractCreation = async () => {
-    console.log('Selected value:', selectedCandidate); // Use the selected value
+    console.log('Selected candidate', selectedCandidate); // Use the selected value
     if (accountId === null) {
       return;
     }
     // TODO handle errors
     const accountDetails = await mirrorNodeClient.getAccountDetails(AccountId.fromString(accountId))
     console.log('Account details:', accountDetails);
-    const contractId = await hscsClient.deployContract(
+    const _contractId = await hscsClient.deployContract(
         appConfig.constants.CONTRACT_FILE_ID,
         accountDetails.evm_address,
         // TODO!!!!
@@ -79,60 +128,56 @@ export default function Home() {
         appConfig.constants.TOKEN_ID,
         appConfig.constants.JOB_OFFER_REWARD
     );
-    if (contractId === null) {
+    if (_contractId === null) {
         return;
     }
-
+    setContractId(_contractId);
     // check if token is associated with account
     if (accountDetails.balance.tokens.find(token => token.token_id === appConfig.constants.TOKEN_ID) === undefined) {
       await walletInterface.associateToken(TokenId.fromString(appConfig.constants.TOKEN_ID));
     }
+    // transfer tokens to the signer from operator account
     await transferNonFungibleToken(operatorClient, appConfig.constants.TOKEN_ID, appConfig.constants.OPERATOR_ACCOUNT_ID, accountId, appConfig.constants.JOB_OFFER_REWARD);
-    await walletInterface.createTokenAllowance(TokenId.fromString(appConfig.constants.TOKEN_ID), contractId, appConfig.constants.JOB_OFFER_REWARD);
+    // create allowance for the contract
+    await walletInterface.createTokenAllowance(TokenId.fromString(appConfig.constants.TOKEN_ID), _contractId, appConfig.constants.JOB_OFFER_REWARD);
+    // deposit tokens to the contract
+    await deposit(operatorClient, _contractId);
+    setIsDeposited(true);
+    console.log('deposit done');
   };
 
+  const handleReleaseReward = async () => {
+    if (accountId === null || contractId === null) {
+      return;
+    }
+    console.log('Releasing reward for contract', contractId);
+    await walletInterface?.executeContractFunction(contractId, 'release',new ContractFunctionParameterBuilder() , 1_000_000);
+  }
+  const handleRefund = async () => {
+    if (accountId === null || contractId === null) {
+      return;
+    }
+    await refund(operatorClient, contractId);
+  }
   return (
     <Stack alignItems="center" spacing={4}>
       {walletInterface !== null && (
         <>
-          <Stack direction="column" alignItems="center" spacing={2}>
-            <Typography variant="h3">Job Posting</Typography>
-            <Typography variant="h4">Ring Bearer for Mission to Mount Doom</Typography>
-            <Typography variant="body1" sx={{ maxWidth: '70%' }}>I am looking for a courageous and trustworthy individual to carry the One Ring across Middle-earth to Mount Doom in Mordor. The selected candidate must resist the corrupting influence of the Ring and ensure it is destroyed by casting it into the volcanic fires.</Typography>
-            <Typography variant="h5">Reward: {appConfig.constants.JOB_OFFER_REWARD} Castar</Typography>
-          </Stack>
+          <JobPosting />
           <Divider sx={{ width: '100%' }} />
-          <Stack direction="column" alignItems="center" spacing={2}>
-            <Typography variant="h4">Available candidates</Typography>
-            <RadioGroup onChange={handleCandidateSelection} defaultValue={selectedCandidate}>
-            <FormControlLabel
-                value={Candidates.FRODO}
-                control={<Radio />}
-                label={
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar src={FrodoAvatar}  />
-                    <Typography>Frodo Baggins</Typography>
-                  </Stack>
-                }
+          {isDeposited ? (
+            <ReviewProcess
+                selectedCandidate={selectedCandidate}
+                handleReleaseReward={handleReleaseReward}
+                handleRefund={handleRefund}
             />
-            <FormControlLabel
-                value={Candidates.GOLLUM}
-                control={<Radio />}
-                label={
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar src={GollumAvatar} />
-                    <Typography>Gollum (Sméagol)</Typography>
-                  </Stack>
-                }
-            />
-            <Button
-                variant='contained'
-                onClick={handleContractCreation}
-            >
-              Create Contract
-            </Button>
-          </RadioGroup>
-          </Stack>
+          ) : (
+              <CandidateSelection
+                  selectedCandidate={selectedCandidate}
+                  handleCandidateSelection={handleCandidateSelection}
+                  handleContractCreation={handleContractCreation}
+              />
+              )}
         </>
       )}
     </Stack>
