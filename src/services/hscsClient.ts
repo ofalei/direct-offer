@@ -1,14 +1,14 @@
-import {ContractCreateTransaction, ContractFunctionParameters, FileId, TokenId} from "@hashgraph/sdk";
-import { Client } from "@hashgraph/sdk";
+import {Client, ContractCreateTransaction, ContractFunctionParameters, FileId, TokenId} from "@hashgraph/sdk";
 
 export class HSCSClient {
     client: Client;
+
     constructor(client: Client) {
         this.client = client;
     }
 
     async deployContract(fileId: string, employerAddress: string, employeeAddress: string, tokenId: string, amount: number, gas: number = 1_000_000) {
-        const contractTransaction =  new ContractCreateTransaction()
+        const contractTransaction = new ContractCreateTransaction()
             .setBytecodeFileId(FileId.fromString(fileId))
             .setGas(gas)
             .setConstructorParameters(new ContractFunctionParameters()

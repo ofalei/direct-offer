@@ -1,5 +1,5 @@
-import { AccountId } from "@hashgraph/sdk";
-import { NetworkConfig } from "../../config";
+import {AccountId} from "@hashgraph/sdk";
+import {NetworkConfig} from "../../config";
 
 
 export interface PublicKey {
@@ -18,19 +18,20 @@ export interface AccountBalance {
 }
 
 export interface AccountDetails {
-  key: PublicKey,
-  evm_address: string,
-  balance: AccountBalance,
+    key: PublicKey,
+    evm_address: string,
+    balance: AccountBalance,
 }
 
 export class MirrorNodeClient {
-  url: string;
-  constructor(networkConfig: NetworkConfig) {
-    this.url = networkConfig.mirrorNodeUrl;
-  }
+    url: string;
 
-  async getAccountDetails(accountId: AccountId): Promise<AccountDetails> {
-    const accountDetails = await fetch(`${this.url}/api/v1/accounts/${accountId}`, { method: "GET" });
-    return await accountDetails.json() as AccountDetails;
-  }
+    constructor(networkConfig: NetworkConfig) {
+        this.url = networkConfig.mirrorNodeUrl;
+    }
+
+    async getAccountDetails(accountId: AccountId): Promise<AccountDetails> {
+        const accountDetails = await fetch(`${this.url}/api/v1/accounts/${accountId}`, {method: "GET"});
+        return await accountDetails.json() as AccountDetails;
+    }
 }
