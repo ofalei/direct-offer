@@ -4,7 +4,6 @@ import NavBar from './components/Navbar';
 import { Box, ThemeProvider } from '@mui/material';
 import { AllWalletsProvider } from './services/wallets/AllWalletsProvider';
 import AppRouter from './AppRouter';
-import colorBackground from './assets/colors.png';
 import { theme } from './theme';
 import "./App.css";
 
@@ -19,7 +18,6 @@ function App() {
             flexDirection: 'column',
             minHeight: '100vh',
             backgroundColor: '#222222',
-            backgroundImage: `url(${colorBackground})`,
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center'

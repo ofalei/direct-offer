@@ -1,7 +1,17 @@
 import { WalletConnectContext } from "../../../contexts/WalletConnectContext";
 import { useCallback, useContext, useEffect } from 'react';
 import { WalletInterface } from "../walletInterface";
-import { AccountId, ContractExecuteTransaction, ContractId, LedgerId, TokenAssociateTransaction, TokenId, Transaction, TransactionId, TransferTransaction, Client } from "@hashgraph/sdk";
+import {
+  AccountId,
+  ContractExecuteTransaction,
+  ContractId,
+  LedgerId,
+  TokenAssociateTransaction,
+  TokenId,
+  TransferTransaction,
+  Client,
+  AccountAllowanceApproveTransaction
+} from "@hashgraph/sdk";
 import { ContractFunctionParameterBuilder } from "../contractFunctionParameterBuilder";
 import { appConfig } from "../../../config";
 import { SignClientTypes } from "@walletconnect/types";
@@ -123,6 +133,17 @@ class WalletConnectWallet implements WalletInterface {
     // after getting the contract call results, use ethers and abi.decode to decode the call_result
     return txResult ? txResult.transactionId : null;
   }
+
+  async createTokenAllowance(tokenId: TokenId, spenderAccountId: AccountId | ContractId, amount: number) {
+    const signer = this.getSigner();
+    const allowanceTransaction = await new AccountAllowanceApproveTransaction()
+        .approveTokenAllowance(tokenId, this.getAccountId(), spenderAccountId, amount)
+        .freezeWithSigner(signer);
+    const txResult = await allowanceTransaction.executeWithSigner(signer);
+    return txResult ? txResult.transactionId : null;
+  }
+
+
   disconnect() {
     dappConnector.disconnectAll().then(() => {
       refreshEvent.emit("sync");

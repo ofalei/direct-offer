@@ -1,6 +1,5 @@
 import { AppBar, Button, Toolbar, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import HBARLogo from "../assets/hbar-logo.svg";
 import { useWalletInterface } from '../services/wallets/useWalletInterface';
 import { WalletSelectionDialog } from './WalletSelectionDialog';
 
@@ -25,9 +24,8 @@ export default function NavBar() {
   return (
     <AppBar position='relative'>
       <Toolbar>
-        <img src={HBARLogo} alt='An upper case H with a line through the top' className='hbarLogoImg' />
         <Typography variant="h6" color="white" pl={1} noWrap>
-          Happy Building
+          Direct Offer
         </Typography>
         <Button
           variant='contained'
