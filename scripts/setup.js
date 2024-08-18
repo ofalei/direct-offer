@@ -11,10 +11,11 @@ const {
     TokenAssociateTransaction,
     AccountCreateTransaction,
     FileAppendTransaction,
-    FileContentsQuery
+    FileContentsQuery,
+    TransferTransaction
 } = require("@hashgraph/sdk");
 
-const CONTRACT_DIR = path.join(__dirname, '../src/contracts');
+const CONTRACT_DIR = path.join(__dirname, '../contracts');
 
 async function configureClient() {
     try {
@@ -95,6 +96,7 @@ async function createAccount(client) {
         return {
             accountId: transactionReceipt.accountId,
             privateKey: privateKey,
+            publicKey: publicKey
         };
     } catch (error) {
         console.error("Error creating account:", error);
@@ -102,9 +104,22 @@ async function createAccount(client) {
     }
 }
 
+async function transferFunds(client, fromAccountId, toAccountId, amount) {
+    try {
+        const transactionResponse = await new TransferTransaction()
+            .addHbarTransfer(fromAccountId, -amount)
+            .addHbarTransfer(toAccountId, amount)
+            .execute(client);
+        await transactionResponse.getReceipt(client);
+    } catch (error) {
+        console.error(`Error transferring ${amount} hbar from account ID ${fromAccountId} to account ID ${toAccountId}:`, error);
+        process.exit(1);
+    }
+}
+
 async function main() {
     const client = await configureClient();
-    const bytecodePath = path.join(CONTRACT_DIR, 'artifacts/OneTimeJobOffer_sol_OneTimeJobOffer.bin');
+    const bytecodePath = path.join(CONTRACT_DIR, 'build/OneTimeJobOffer_sol_OneTimeJobOffer.bin');
     const bytecode = fs.readFileSync(bytecodePath);
     const bytecodeFileId = await uploadFile(client, bytecode.toString());
     console.log("The smart contract bytecode file ID is", bytecodeFileId);
@@ -112,13 +127,23 @@ async function main() {
     const tokenId = await createToken(client);
     console.log("The token ID is", tokenId.toString());
 
+    const operatorAccount = await createAccount(client);
+    await associateToken(client, tokenId, operatorAccount.accountId);
+    console.log("Operator account ID is", operatorAccount.accountId.toString());
+    console.log("Operator private key is", operatorAccount.privateKey.toString());
+
+    await transferFunds(client, client.operatorAccountId, operatorAccount.accountId, 500)
+
     const gollumAccount = await createAccount(client);
     await associateToken(client, tokenId, gollumAccount.accountId);
     console.log("Gollum account ID is", gollumAccount.accountId.toString());
+    console.log("Gollum public key is", gollumAccount.publicKey.toString());
 
     const frodoAccount = await createAccount(client);
     await associateToken(client, tokenId, frodoAccount.accountId);
     console.log("Frodo account ID is", frodoAccount.accountId.toString());
+    console.log("Frodo public key is", frodoAccount.publicKey.toString());
+
     client.close()
 }
 
