@@ -1,5 +1,5 @@
 import {AccountId} from "@hashgraph/sdk";
-import {NetworkConfig} from "../../config";
+import {NetworkConfig} from "../config";
 
 
 export interface PublicKey {
