@@ -19,7 +19,7 @@ export class ContractClient {
             .setBytecodeFileId(FileId.fromString(fileId))
             .setGas(gas)
             .setConstructorParameters(new ContractFunctionParameters()
-                .addAddress(this.client.operatorPublicKey!.toEvmAddress())
+                .addAddress(this.client.operatorAccountId!.toSolidityAddress())
                 .addAddress(employerAddress)
                 .addAddress(employeeAddress)
                 .addAddress(TokenId.fromString(tokenId).toSolidityAddress())

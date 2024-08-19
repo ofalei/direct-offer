@@ -72,15 +72,4 @@ contract OneTimeJobOffer is HederaTokenService {
         emit Refunded(employer, amount);
         return response;
     }
-
-    function getStatus() external view returns (string memory) {
-        if (status == PaymentStatus.Deposited) {
-            return "DEPOSITED";
-        } else if (status == PaymentStatus.Released) {
-            return "RELEASED";
-        } else if (status == PaymentStatus.Refunded) {
-            return "REFUNDED";
-        }
-        return "NOT_DEPOSITED";
-    }
 }
