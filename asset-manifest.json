@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/direct-offer/static/css/main.b1f2e1c5.css",
-    "main.js": "/direct-offer/static/js/main.d6d75a14.js",
+    "main.js": "/direct-offer/static/js/main.48390fa1.js",
     "static/js/126.f1ffde64.chunk.js": "/direct-offer/static/js/126.f1ffde64.chunk.js",
     "static/media/gollum.jpeg": "/direct-offer/static/media/gollum.ab19355158eddde07f1a.jpeg",
     "static/media/StyreneA-ThinItalic-Web.eot": "/direct-offer/static/media/StyreneA-ThinItalic-Web.8cbd9fb1122e2ca751e4.eot",
@@ -46,11 +46,11 @@
     "static/media/walletconnect-logo.svg": "/direct-offer/static/media/walletconnect-logo.a1aae2e6951e60f34926642947a36f84.svg",
     "index.html": "/direct-offer/index.html",
     "main.b1f2e1c5.css.map": "/direct-offer/static/css/main.b1f2e1c5.css.map",
-    "main.d6d75a14.js.map": "/direct-offer/static/js/main.d6d75a14.js.map",
+    "main.48390fa1.js.map": "/direct-offer/static/js/main.48390fa1.js.map",
     "126.f1ffde64.chunk.js.map": "/direct-offer/static/js/126.f1ffde64.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b1f2e1c5.css",
-    "static/js/main.d6d75a14.js"
+    "static/js/main.48390fa1.js"
   ]
 }
