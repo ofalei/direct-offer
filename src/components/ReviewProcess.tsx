@@ -1,7 +1,11 @@
-import { Button, CardMedia, Stack, Typography } from "@mui/material";
+import { Button, Avatar, Stack,CardMedia, Typography } from "@mui/material";
 import { ContractFunctionParameterBuilder } from "../services/wallets/contractFunctionParameterBuilder";
 import { ContractId } from "@hashgraph/sdk";
 import { appConfig, Users } from "../config";
+import { useState } from "react";
+import GandalfAvatar from "../assets/gandalf.jpg";
+import GaladrielAvatar from "../assets/galadriel.jpeg";
+import ElronAvatar from "../assets/elrond.jpeg";
 
 interface ReviewProcessProps {
   selectedCandidate: Users;
@@ -12,6 +16,8 @@ interface ReviewProcessProps {
 
 export default function ReviewProcess({ selectedCandidate, contractId, walletInterface, contractClient }: ReviewProcessProps) {
   const candidateConfigs = appConfig.users[selectedCandidate];
+  const [disputeFiled, setDisputeFiled] = useState(false);
+
   const handleReleaseReward = async () => {
     if (contractId === null) {
       return;
@@ -25,6 +31,7 @@ export default function ReviewProcess({ selectedCandidate, contractId, walletInt
     }
     try {
       await contractClient.callContract(contractId, candidateConfigs.isDisputeWon ? 'refund' : 'release', 1_000_000);
+      setDisputeFiled(true);
     } catch (error) {
       console.error('Error calling contract', error);
       return;
@@ -33,6 +40,19 @@ export default function ReviewProcess({ selectedCandidate, contractId, walletInt
 
   return (
     <Stack direction="column" alignItems="center" spacing={2}>
+      {disputeFiled ? (
+          <>
+          <Stack direction={"row"} alignItems='center' spacing={2}>
+            <Avatar src={GaladrielAvatar}/>
+            <Avatar src={GandalfAvatar}/>
+            <Avatar src={ElronAvatar}/>
+          </Stack>
+            <Typography variant="h6">
+              The council has decided to {candidateConfigs.isDisputeWon ? `release the reward to ${candidateConfigs.name}` : "refund your deposited reward"}
+            </Typography>
+          </>
+      ) : (
+      <>
       <Typography variant="h4">Review process</Typography>
       <CardMedia
         component="img"
@@ -48,6 +68,8 @@ export default function ReviewProcess({ selectedCandidate, contractId, walletInt
           Initiate Dispute
         </Button>
       </Stack>
+      </>
+)}
     </Stack>
   );
 }
