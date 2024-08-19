@@ -1,5 +1,0 @@
-exports.TOKEN_ID = '0.0.4685909';
-exports.CONTRACT_FILE_ID = '0.0.4685908';
-exports.GOLLUM_ACCOUNT_ID = '0.0.4685910';
-exports.FRODO_ACCOUNT_ID = '0.0.4685911';
-exports.CONTRACT_ID = '0.0.4685912';
