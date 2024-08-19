@@ -17,19 +17,6 @@ const {
 
 const CONTRACT_DIR = path.join(__dirname, '../contracts');
 
-async function configureClient(privateKey, accountId) {
-    try {
-        const operatorPrivateKey = PrivateKey.fromStringECDSA(process.env.OPERATOR_PRIVATE_KEY);
-        const operatorAccountId = AccountId.fromString(process.env.OPERATOR_ACCOUNT_ID);
-        const client = Client.forTestnet();
-        client.setOperator(operatorAccountId, operatorPrivateKey);
-        return client;
-    } catch (error) {
-        console.error("Error configuring the client:", error);
-        process.exit(1);
-    }
-}
-
 
 async function uploadFile(client, content) {
     try {
