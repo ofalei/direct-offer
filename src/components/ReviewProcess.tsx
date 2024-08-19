@@ -1,23 +1,17 @@
 import { Button, CardMedia, Stack, Typography } from "@mui/material";
-import { Candidates } from "../config/data";
-import GollumWorkReview from "../assets/gollum-work-review.jpeg";
-import FrodoWorkReview from "../assets/frodo-work-review.jpeg";
 import { ContractFunctionParameterBuilder } from "../services/wallets/contractFunctionParameterBuilder";
 import { ContractId } from "@hashgraph/sdk";
+import { appConfig, Users } from "../config";
 
 interface ReviewProcessProps {
-  selectedCandidate: Candidates;
+  selectedCandidate: Users;
   contractId: ContractId | null;
   walletInterface: any;
   contractClient: any;
 }
 
 export default function ReviewProcess({ selectedCandidate, contractId, walletInterface, contractClient }: ReviewProcessProps) {
-  let image = FrodoWorkReview;
-  if (selectedCandidate === Candidates.GOLLUM) {
-    image = GollumWorkReview;
-  }
-
+  const candidateConfigs = appConfig.users[selectedCandidate];
   const handleReleaseReward = async () => {
     if (contractId === null) {
       return;
@@ -29,13 +23,8 @@ export default function ReviewProcess({ selectedCandidate, contractId, walletInt
     if (contractId === null) {
       return;
     }
-    let contractFunction = 'refund'
-    if (selectedCandidate !== Candidates.FRODO) {
-      contractFunction = 'release';
-    }
-
     try {
-      await contractClient.callContract(contractId, contractFunction, 1_000_000);
+      await contractClient.callContract(contractId, candidateConfigs.isDisputeWon ? 'refund' : 'release', 1_000_000);
     } catch (error) {
       console.error('Error calling contract', error);
       return;
@@ -47,7 +36,7 @@ export default function ReviewProcess({ selectedCandidate, contractId, walletInt
       <Typography variant="h4">Review process</Typography>
       <CardMedia
         component="img"
-        image={image}
+        image={candidateConfigs.workReviewImagePath}
         alt="Work Review"
         sx={{ width: 500 }}
       />

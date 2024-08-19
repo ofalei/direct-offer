@@ -1,5 +1,5 @@
 import { AccountId, Client, ContractId, PrivateKey, PublicKey, TokenId, } from "@hashgraph/sdk";
-import { CardMedia, Divider } from "@mui/material";
+import { Divider } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useWalletInterface } from "../services/wallets/useWalletInterface";
 import { useState } from "react";
@@ -11,17 +11,8 @@ import { ContractFunctionParameterBuilder } from "../services/wallets/contractFu
 import ReviewProcess from "../components/ReviewProcess";
 import JobPosting from "../components/JobPosting";
 import CandidateSelection from "../components/CandidateSelection";
-import { Candidates } from "../config/data";
+import { Users } from '../config';
 
-
-function stringToEnum(value: string): Candidates {
-  if (Object.values(Candidates).includes(value as Candidates)) {
-    return value as Candidates;
-  }
-
-  // dev check
-  throw new Error('Invalid candidate value');
-}
 
 function getOperatorClient() {
   const operatorPrivateKey = PrivateKey.fromStringECDSA(appConfig.constants.OPERATOR_PRIVATE_KEY);
@@ -37,11 +28,11 @@ export default function Home() {
   const contractClient = new ContractClient(operatorClient);
   const accountClient = new AccountClient(operatorClient);
   const {walletInterface, accountId} = useWalletInterface();
-  const [selectedCandidate, setSelectedCandidate] = useState(Candidates.FRODO);
+  const [selectedCandidate, setSelectedCandidate] = useState<Users>('frodo');
   const [contractId, setContractId] = useState<ContractId | null>(null);
   const [isDeposited, setIsDeposited] = useState(false);
   const handleCandidateSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedCandidate(stringToEnum(event.target.value)); // Update the state with the selected value
+    setSelectedCandidate(event.target.value as Users); // Update the state with the selected value
   };
 
   const handleContractCreation = async () => {
@@ -52,13 +43,8 @@ export default function Home() {
     }
     const accountDetails = await mirrorNodeClient.getAccountDetails(AccountId.fromString(accountId))
     console.log('Account details:', accountDetails);
-
-    let employeeKey = PublicKey.fromString(appConfig.constants.FRODO_PUBLIC_KEY);
-    if (selectedCandidate !== Candidates.FRODO) {
-        employeeKey = PublicKey.fromString(appConfig.constants.GOLLUM_PUBLIC_KEY);
-    }
-
-    const _contractId = await contractClient.deployContract(appConfig.constants.CONTRACT_FILE_ID, accountDetails.evm_address, employeeKey.toEvmAddress(), appConfig.constants.TOKEN_ID, appConfig.constants.JOB_OFFER_REWARD);
+    const candidateConfigs = appConfig.users[selectedCandidate];
+    const _contractId = await contractClient.deployContract(appConfig.constants.CONTRACT_FILE_ID, accountDetails.evm_address, PublicKey.fromString(candidateConfigs.publicKey).toEvmAddress(), appConfig.constants.TOKEN_ID, appConfig.constants.JOB_OFFER_REWARD);
     if (_contractId === null) {
       return;
     }

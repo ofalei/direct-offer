@@ -17,6 +17,18 @@ export type NetworkConfigs = {
     }
 };
 
+export type UserConfig = {
+    name: string,
+    accountId: string,
+    publicKey: string,
+    avatarImagePath: string,
+    workReviewImagePath: string
+    isDisputeWon: boolean
+}
+
+export type Users = "frodo" | "gollum";
+
 export type AppConfig = {
     networks: NetworkConfigs,
+    users: Record<Users, UserConfig>
 }
