@@ -47,6 +47,7 @@ export default function Home() {
   const handleContractCreation = async () => {
     console.log('Selected candidate', selectedCandidate); // Use the selected value
     if (accountId === null) {
+      console.log('Account ID is null')
       return;
     }
     const accountDetails = await mirrorNodeClient.getAccountDetails(AccountId.fromString(accountId))
@@ -71,31 +72,20 @@ export default function Home() {
     // create allowance for the contract
     await walletInterface.createTokenAllowance(TokenId.fromString(appConfig.constants.TOKEN_ID), _contractId, appConfig.constants.JOB_OFFER_REWARD);
     // deposit tokens to the contract
-    await contractClient.callContract(_contractId, 'deposit', 100_000);
+    await walletInterface?.executeContractFunction(_contractId, 'deposit', new ContractFunctionParameterBuilder(), 100_000);
     setIsDeposited(true);
   };
 
-  const handleReleaseReward = async () => {
-    if (accountId === null || contractId === null) {
-      return;
-    }
-    console.log('Releasing reward for contract', contractId);
-    await walletInterface?.executeContractFunction(contractId, 'release', new ContractFunctionParameterBuilder(), 100_000);
-  }
-  const handleRefund = async () => {
-    if (accountId === null || contractId === null) {
-      return;
-    }
-    await contractClient.callContract(contractId, 'refund', 100_000);
-  }
+
   return (<Stack alignItems="center" spacing={4}>
     {walletInterface !== null && (<>
       <JobPosting/>
       <Divider sx={{width: '100%'}}/>
       {isDeposited ? (<ReviewProcess
         selectedCandidate={selectedCandidate}
-        handleReleaseReward={handleReleaseReward}
-        handleRefund={handleRefund}
+        contractId={contractId}
+        walletInterface={walletInterface}
+        contractClient={contractClient}
       />) : (<CandidateSelection
         selectedCandidate={selectedCandidate}
         handleCandidateSelection={handleCandidateSelection}

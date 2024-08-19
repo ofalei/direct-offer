@@ -64,7 +64,7 @@ contract OneTimeJobOffer is HederaTokenService {
 
     // Function to refund tokens back to the employer if the work is not completed
     function refund() external inStatus(PaymentStatus.Deposited) returns (int) {
-        require(msg.sender == operator, "Only operator or employer can call this function");
+        require(msg.sender == operator, "Only operator can call this function");
         int response = HederaTokenService.transferToken(token, address(this), employer, amount);
         require(response == HederaResponseCodes.SUCCESS, "Token refund to employer failed");
 
