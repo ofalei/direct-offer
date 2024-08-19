@@ -1,16 +1,12 @@
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes
-} from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 
 export default function AppRouter() {
   return (
-    <Router>
+    <BrowserRouter basename="/direct-offer">
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home/>}/>
       </Routes>
-    </Router>
+    </BrowserRouter>
   )
 }
