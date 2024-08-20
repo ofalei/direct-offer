@@ -34,7 +34,7 @@ make compile-contract
 
 ### Scripts
 
-The `scripts/setup.js` script is designed to set up resources on the Hedera Hashgraph network. It creates accounts, issues a token, and uploads the smart contract to the network. For demo purposes, the resource IDs are hardcoded and can be found in the `src/config` directory.
+The `scripts/setup.js` script is designed to set up resources on the Hedera Hashgraph network. It creates accounts, issues a token, and uploads the smart contract to the network. *NOTE*: For demo purposes, the created resource IDs and keys are hardcoded and can be found in the `src/config` directory.
 
 ## Technologies
 
