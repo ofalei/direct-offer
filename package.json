@@ -46,6 +46,7 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^6.1.1"
+    "gh-pages": "^6.1.1",
+    "solc": "^0.8.26"
   }
 }
