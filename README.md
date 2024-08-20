@@ -12,7 +12,7 @@ At the heart of this marketplace will be a suite of smart contracts designed to 
 These smart contracts ensure that all operations, from job creation to payment processing, are handled transparently and 
 automatically.
 
-The primary use cases being explored in this project is the OneTimeJobOffer smart contract. This contract facilitates 
+One of the primary use cases being explored in this project is the OneTimeJobOffer smart contract. This contract facilitates 
 a straightforward and secure transaction between an employer and an employee, ensuring that funds are held in escrow until 
 the job is completed and approved. By harnessing the capabilities of Hedera Hashgraph, the project aims to provide a robust, 
 scalable solution for decentralized job management.
