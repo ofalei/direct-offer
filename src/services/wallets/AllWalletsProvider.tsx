@@ -6,9 +6,9 @@ export const AllWalletsProvider = (props: {
   children: ReactNode | undefined
 }) => {
   return (
-      <WalletConnectContextProvider>
-        <WalletConnectClient />
-        {props.children}
-      </WalletConnectContextProvider>
+    <WalletConnectContextProvider>
+      <WalletConnectClient/>
+      {props.children}
+    </WalletConnectContextProvider>
   )
 }

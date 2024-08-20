@@ -5,7 +5,7 @@ import { WalletSelectionDialog } from './WalletSelectionDialog';
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
-  const { accountId, walletInterface } = useWalletInterface();
+  const {accountId, walletInterface} = useWalletInterface();
 
   const handleConnect = async () => {
     if (accountId) {
@@ -15,11 +15,14 @@ export default function NavBar() {
     }
   };
 
-  useEffect(() => {
-    if (accountId) {
-      setOpen(false);
-    }
-  }, [accountId])
+  useEffect(
+    () => {
+      if (accountId) {
+        setOpen(false);
+      }
+    },
+    [accountId]
+  )
 
   return (
     <AppBar position='relative'>
@@ -37,7 +40,7 @@ export default function NavBar() {
           {accountId ? `Connected: ${accountId}` : 'Connect Wallet'}
         </Button>
       </Toolbar>
-      <WalletSelectionDialog open={open} setOpen={setOpen} onClose={() => setOpen(false)} />
+      <WalletSelectionDialog open={open} setOpen={setOpen} onClose={() => setOpen(false)}/>
     </AppBar>
   )
 }

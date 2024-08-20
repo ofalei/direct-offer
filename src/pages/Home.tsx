@@ -3,7 +3,7 @@ import { Divider } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useWalletInterface } from "../services/wallets/useWalletInterface";
 import { useState } from "react";
-import { appConfig } from "../config";
+import { appConfig, Users } from "../config";
 import { ContractClient } from "../services/contractClient";
 import { MirrorNodeClient } from "../services/mirrorNodeClient";
 import { AccountClient } from "../services/accountClient";
@@ -11,14 +11,16 @@ import { ContractFunctionParameterBuilder } from "../services/wallets/contractFu
 import ReviewProcess from "../components/ReviewProcess";
 import JobPosting from "../components/JobPosting";
 import CandidateSelection from "../components/CandidateSelection";
-import { Users } from '../config';
 
 
 function getOperatorClient() {
   const operatorPrivateKey = PrivateKey.fromStringECDSA(appConfig.constants.OPERATOR_PRIVATE_KEY);
   const operatorAccountId = AccountId.fromString(appConfig.constants.OPERATOR_ACCOUNT_ID);
   const client = Client.forTestnet();
-  client.setOperator(operatorAccountId, operatorPrivateKey);
+  client.setOperator(
+    operatorAccountId,
+    operatorPrivateKey
+  );
   return client;
 }
 
@@ -36,15 +38,27 @@ export default function Home() {
   };
 
   const handleContractCreation = async () => {
-    console.log('Selected candidate', selectedCandidate); // Use the selected value
+    console.log(
+      'Selected candidate',
+      selectedCandidate
+    ); // Use the selected value
     if (accountId === null) {
       console.log('Account ID is null')
       return;
     }
     const accountDetails = await mirrorNodeClient.getAccountDetails(AccountId.fromString(accountId))
-    console.log('Account details:', accountDetails);
+    console.log(
+      'Account details:',
+      accountDetails
+    );
     const candidateConfigs = appConfig.users[selectedCandidate];
-    const _contractId = await contractClient.deployContract(appConfig.constants.CONTRACT_FILE_ID, accountDetails.evm_address, PublicKey.fromString(candidateConfigs.publicKey).toEvmAddress(), appConfig.constants.TOKEN_ID, appConfig.constants.JOB_OFFER_REWARD);
+    const _contractId = await contractClient.deployContract(
+      appConfig.constants.CONTRACT_FILE_ID,
+      accountDetails.evm_address,
+      PublicKey.fromString(candidateConfigs.publicKey).toEvmAddress(),
+      appConfig.constants.TOKEN_ID,
+      appConfig.constants.JOB_OFFER_REWARD
+    );
     if (_contractId === null) {
       return;
     }
@@ -54,11 +68,26 @@ export default function Home() {
       await walletInterface.associateToken(TokenId.fromString(appConfig.constants.TOKEN_ID));
     }
     // transfer tokens to the signer from operator account
-    await accountClient.transferNonFungibleToken(operatorClient, appConfig.constants.TOKEN_ID, appConfig.constants.OPERATOR_ACCOUNT_ID, accountId, appConfig.constants.JOB_OFFER_REWARD);
+    await accountClient.transferNonFungibleToken(
+      operatorClient,
+      appConfig.constants.TOKEN_ID,
+      appConfig.constants.OPERATOR_ACCOUNT_ID,
+      accountId,
+      appConfig.constants.JOB_OFFER_REWARD
+    );
     // create allowance for the contract
-    await walletInterface.createTokenAllowance(TokenId.fromString(appConfig.constants.TOKEN_ID), _contractId, appConfig.constants.JOB_OFFER_REWARD);
+    await walletInterface.createTokenAllowance(
+      TokenId.fromString(appConfig.constants.TOKEN_ID),
+      _contractId,
+      appConfig.constants.JOB_OFFER_REWARD
+    );
     // deposit tokens to the contract
-    await walletInterface?.executeContractFunction(_contractId, 'deposit', new ContractFunctionParameterBuilder(), 100_000);
+    await walletInterface?.executeContractFunction(
+      _contractId,
+      'deposit',
+      new ContractFunctionParameterBuilder(),
+      100_000
+    );
     setIsDeposited(true);
   };
 

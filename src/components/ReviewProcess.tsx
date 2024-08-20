@@ -1,4 +1,4 @@
-import { Button, Avatar, Stack,CardMedia, Typography } from "@mui/material";
+import { Avatar, Button, CardMedia, Stack, Typography } from "@mui/material";
 import { ContractFunctionParameterBuilder } from "../services/wallets/contractFunctionParameterBuilder";
 import { ContractId } from "@hashgraph/sdk";
 import { appConfig, Users } from "../config";
@@ -14,7 +14,12 @@ interface ReviewProcessProps {
   contractClient: any;
 }
 
-export default function ReviewProcess({ selectedCandidate, contractId, walletInterface, contractClient }: ReviewProcessProps) {
+export default function ReviewProcess({
+                                        selectedCandidate,
+                                        contractId,
+                                        walletInterface,
+                                        contractClient
+                                      }: ReviewProcessProps) {
   const candidateConfigs = appConfig.users[selectedCandidate];
   const [disputeFiled, setDisputeFiled] = useState(false);
   const [rewardReleased, setRewardReleased] = useState(false);
@@ -23,7 +28,12 @@ export default function ReviewProcess({ selectedCandidate, contractId, walletInt
     if (contractId === null) {
       return;
     }
-    await walletInterface?.executeContractFunction(contractId, 'release', new ContractFunctionParameterBuilder(), 1_000_000);
+    await walletInterface?.executeContractFunction(
+      contractId,
+      'release',
+      new ContractFunctionParameterBuilder(),
+      1_000_000
+    );
     setRewardReleased(true);
   }
 
@@ -33,10 +43,17 @@ export default function ReviewProcess({ selectedCandidate, contractId, walletInt
       return;
     }
     try {
-      await contractClient.callContract(contractId, candidateConfigs.isDisputeWon ? 'release': 'refund', 1_000_000);
+      await contractClient.callContract(
+        contractId,
+        candidateConfigs.isDisputeWon ? 'release' : 'refund',
+        1_000_000
+      );
       setDisputeFiled(true);
     } catch (error) {
-      console.error('Error calling contract', error);
+      console.error(
+        'Error calling contract',
+        error
+      );
       return;
     }
   }
@@ -53,7 +70,8 @@ export default function ReviewProcess({ selectedCandidate, contractId, walletInt
             <Avatar src={ElronAvatar}/>
           </Stack>
           <Typography variant="h6">
-            The council has decided to {candidateConfigs.isDisputeWon ? `release the reward to ${candidateConfigs.name}` : "refund your deposited reward"}
+            The council has decided
+            to {candidateConfigs.isDisputeWon ? `release the reward to ${candidateConfigs.name}` : "refund your deposited reward"}
           </Typography>
         </>
       ) : (
@@ -63,7 +81,7 @@ export default function ReviewProcess({ selectedCandidate, contractId, walletInt
             component="img"
             image={candidateConfigs.workReviewImagePath}
             alt="Work Review"
-            sx={{ width: 500 }}
+            sx={{width: 500}}
           />
           <Stack direction="row" spacing={2}>
             <Button variant='contained' onClick={handleReleaseReward}>

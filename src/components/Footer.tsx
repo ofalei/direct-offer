@@ -12,11 +12,11 @@ export default function Footer() {
       <Box
         className='footer'
       >
-          <img 
-            src={BuiltOnHedera}
-            alt='An upper case H with a line through the top and the text Build on Hedera'
-            className='builtOnHederaSVG'
-          />
+        <img
+          src={BuiltOnHedera}
+          alt='An upper case H with a line through the top and the text Build on Hedera'
+          className='builtOnHederaSVG'
+        />
       </Box>
     </Box>
   );
